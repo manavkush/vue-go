@@ -40,7 +40,7 @@ func (client *Client) handleNewMessage(jsonData []byte) {
 		case SendMessageAction:
 			client.handleSendMessageAction(message)
 		case LeaveRoomAction:
-			client.handleLeaveRoomAction(mesage)
+			client.handleLeaveRoomAction(message)
 		case JoinRoomAction:
 			client.handleJoinRoomAction(message)
 	}
@@ -58,4 +58,30 @@ func (client *Client) handleSendMessageAction(message *Message) {
 	room.broadcast <- message
 }
 
+func (client *Client) handleJoinRoomAction(message *Message) {
+	roomName := message.Target
+	room := client.server.findRoomByName(roomName)
 
+	if room == nil {
+		log.Println("Error in handleJoinRoomAction. Couldn't find the room.")
+		return
+	}
+
+	client.rooms[room] = true
+	room.register <- client
+}
+
+func (client *Client) handleLeaveRoomAction(message *Message) {
+	roomName := message.Target
+	room := client.server.findRoomByName(roomName)
+
+	if room == nil {
+		log.Println("Error in handleLeaveRoomAction. Couldn't find the room.")
+	}
+
+	present := client.rooms[room]
+	if present {
+		delete(client.rooms, room)
+		room.unregister <- client
+	}
+}
