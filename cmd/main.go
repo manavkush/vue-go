@@ -16,7 +16,9 @@ var upgrader = websocket.Upgrader{
 }
 
 func handleWsConnection(wsServer *Server, socket *websocket.Conn) {
-	client := newClient(socket)
+	name := ""
+
+	client := newClient(name, socket, wsServer)
 	registerClient(client)
 
 	go readPump()

@@ -1,14 +1,14 @@
 package main
 
 type Server struct {
-	rooms map[*Room]bool
+	rooms map[string]*Room
 	wsRegister chan *Client
 	wsUnregister chan *Client
 }
 
 func createWsServer() *Server {
 	return &Server{
-		room : make(map[*Room]bool),
+		rooms : make(map[string]*Room),
 		wsUnregister : make(chan *Client),
 		wsRegister : make(chan *Client),
 	}
@@ -20,9 +20,16 @@ func (server *Server) registerClient(client *Client) {
 
 func (server *Server) unregisterClient(client *Client) {
 	for room := range(client.rooms) {
-		client.disconnect(room)
+		room.disconnect(room)
 	}
 	server.wsUnregister <- client
 }
 
+func (server *Server) findRoomByName(roomName string) *Room {
+	room, ok := server.rooms[roomName]
+	if !ok {
+		return nil
+	}
 
+	return room
+}

@@ -3,7 +3,18 @@ package main
 type Room struct {
 	name string
 	clients map[*Client]bool
-	register *Client
-	unregister *Client
-	broadcast chan Message
+	register chan *Client
+	unregister chan *Client
+	broadcast chan *Message
 }
+
+func NewRoom(name string) *Room {
+	return &Room{
+		name: name,
+		clients: make(map[*Client]bool),
+		register: make(chan *Client),
+		unregister: make(chan *Client),
+		broadcast: make(chan *Message),
+	}
+}
+
